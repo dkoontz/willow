@@ -37,28 +37,42 @@ head : Array a -> Result String a
 ```
 
 ### Function implementation
-Indented after type signature
+```elm
+doFoo :: Int -> Int
+  i => ...
+```
+
+
+Pattern match doesn't require function name for each case
 ```elm
 logMessage : Message -> String
-  Start = "Game started"
-  Options = "Options"
-  Jump { entity } = "{entity.name} jumped"
-  Collision { entities } =
+  Start => "Game started"
+  Options => "Options"
+  Jump { entity } => "{entity.name} jumped"
+  Collision { entities } =>
     _.name `map` entities
     |> join ', '
     |> "Entities: {}"
-  Die { entity } = "{entity.name} died"
-  Score { amount } = "Gained {amount} points"
+  Die { entity } => "{entity.name} died"
+  Score { amount } => "Gained {amount} points"
 ```
 
-#### Idea: ADT's can be guarded by a predicate function
-Not sure how this would work out since there must be some way to return something that is not the value indicating the predictate failed
+### Types can have predicates
 ```elm
-type Index = Int :: i => 0 <= i
-current : Index
-current = 5
-next : Index
-next = 0 -- can't put an actual Index here, can't throw an exception, what do we do?
+type Index = Int => 0 <= t
+type PositiveInt = Int => 0 < t
+type NonEmptyList a = List a => 0 < length(t)
+type NonZeroInt = Int => t != 0
+
+type PublishStatus = WannabeAuthor | RealAuthor { books :: NonEmptyList String }
+type Author = { name :: String, status :: PublishStatus }
+type Book = { name :: String, author :: Author }
+
+type PublishedAuthor = Author =>
+  when t.status is
+    WannabeAuthor -> false
+    RealAuthor -> true
+scheduleBookTour :: PublishedAuthor -> Booking
 ```
 
 ### Records
